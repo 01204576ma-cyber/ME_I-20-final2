@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, viewport-fit=cover"
+>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="前方エリア">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#edf3f3">
+
+<link rel="manifest" href="./manifest.json">
+
+<title>前方エリア</title>
+
+<style>
+/*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+前方エリア Template Ver.4
+メンテナンス版
+
+使用ファイル
+・index.html
+・ticket.html
+・manifest.json
+・middle.JPG
+・top_glass.PNG
+・top_ui.PNG
+・bottom_glass.PNG
+・bottom_ui.PNG
+
+画像サイズ
+・top_glass.PNG：1200 × 199
+・top_ui.PNG：2400 × 398（同じ比率）
+・middle.JPG：1200 × 7738
+・bottom_glass.PNG：1200 × 248
+・bottom_ui.PNG：2400 × 496（同じ比率）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+*/
+
+:root {
+  /* ─────────────────────────
+     画像サイズ
+     次回画像サイズが変わった場合のみ変更
+  ───────────────────────── */
+
+  --image-width: 1200;
+
+  --top-image-height: 199;
+  --bottom-image-height: 248;
+
+  --top-height:
+    calc(100vw * var(--top-image-height) / var(--image-width));
+
+  --bottom-height:
+    calc(100vw * var(--bottom-image-height) / var(--image-width));
+
+  /* ─────────────────────────
+     真ん中画像の上下余白
+     例：10px / 20px / 30px
+  ───────────────────────── */
+
+  --middle-space: 120px;
+
+  /* ─────────────────────────
+     すりガラス背景の濃さ
+     小さいほど透ける
+     0.72前後がおすすめ
+  ───────────────────────── */
+
+  --glass-opacity: 0.50;
+
+  /* ─────────────────────────
+     背景のぼかし
+     0pxでぼかしなし
+  ───────────────────────── */
+
+  --glass-blur: 3px;
+
+  /* ─────────────────────────
+     ME:Iボタンの透明リンク位置
+     middle.JPG上での割合
+  ───────────────────────── */
+
+  --button-top: 31.2%;
+  --button-left: 9%;
+  --button-width: 82%;
+  --button-height: 3.4%;
+
+  /* ページ背景色 */
+  --page-background: #edf3f3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  overflow: hidden;
+  background: var(--page-background);
+
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   アプリ全体
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.app {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+
+  overflow: hidden;
+  background: var(--page-background);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   真ん中のスクロール部分
+   上下の固定画像の後ろまで通る
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.scroll-area {
+  position: absolute;
+  inset: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  -webkit-overflow-scrolling: touch;
+  background: var(--page-background);
+}
+
+.scroll-content {
+  width: 100%;
+}
+
+/*
+middle.JPGと透明ボタンを同じ枠に入れる。
+上下余白はこの枠のmarginで作るため、
+透明ボタンの位置計算には影響しない。
+*/
+.image-stage {
+  position: relative;
+  width: 100%;
+
+  margin-top: var(--middle-space);
+  margin-bottom: var(--middle-space);
+}
+
+.middle-image {
+  display: block;
+  width: 100%;
+  height: auto;
+
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ME:Iの透明ボタン
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.ticket-link {
+  position: absolute;
+
+  top: var(--button-top);
+  left: var(--button-left);
+
+  width: var(--button-width);
+  height: var(--button-height);
+
+  display: block;
+  z-index: 20;
+
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*
+ボタン位置を目で確認したい時だけ、
+下のコメント記号を外す。
+
+.ticket-link {
+  background: rgba(255, 0, 0, 0.25);
+  outline: 2px solid red;
+}
+*/
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   上固定レイヤー共通
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.top-glass,
+.top-ui {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: var(--top-height);
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.top-glass {
+  z-index: 100;
+
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.top-ui {
+  z-index: 101;
+}
+
+.top-glass img,
+.top-ui img {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.top-glass img {
+  opacity: var(--glass-opacity);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   下固定レイヤー共通
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.bottom-glass,
+.bottom-ui {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: var(--bottom-height);
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bottom-glass {
+  z-index: 100;
+
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.bottom-ui {
+  z-index: 101;
+}
+
+.bottom-glass img,
+.bottom-ui img {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.bottom-glass img {
+  opacity: var(--glass-opacity);
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- 真ん中だけスクロール -->
+  <main class="scroll-area">
+    <div class="scroll-content">
+
+      <div class="image-stage">
+
+        <img
+          class="middle-image"
+          src="./middle.JPG"
+          alt="前方エリア"
+          draggable="false"
+        >
+
+        <!-- ME:Iのボタンからチケットページへ -->
+        <a
+          class="ticket-link"
+          href="./ticket.html"
+          aria-label="ME:Iの前方エリア優先入場券を表示"
+        ></a>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 上：すりガラス背景 -->
+  <div class="top-glass" aria-hidden="true">
+    <img
+      src="./top_glass.PNG"
+      alt=""
+      draggable="false"
+    >
+  </div>
+
+  <!-- 上：文字・アイコン -->
+  <header class="top-ui">
+    <img
+      src="./top_ui.PNG"
+      alt="前方エリア"
+      draggable="false"
+    >
+  </header>
+
+  <!-- 下：すりガラス背景 -->
+  <div class="bottom-glass" aria-hidden="true">
+    <img
+      src="./bottom_glass.PNG"
+      alt=""
+      draggable="false"
+    >
+  </div>
+
+  <!-- 下：文字・アイコン -->
+  <footer class="bottom-ui">
+    <img
+      src="./bottom_ui.PNG"
+      alt="メニュー"
+      draggable="false"
+    >
+  </footer>
+
+</div>
+
+</body>
+</html>
